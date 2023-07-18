@@ -1,13 +1,15 @@
-from sys import exit, stdout
-from time import sleep
-from os import system
-from random import randint
+# ==GAME IMPORTATION BLOCK== #
+from sys import exit, stdout  # Will be used to exit prompt and to control text speed
+from time import sleep  # Will be used to control text speed
+from os import system  # Will be used to interact with prompt
+from random import randint  # Will be used to add random elements to the game
 
 
-# GAME SETUPS
+# ==GAME SETUPS== #
 # Recurrent Functions
 def clear_screen():
     system('cls')
+    # This function will always be used when the screen needed to be clean
 
 
 def timed_speech(text: str, velocity: float):
@@ -15,6 +17,7 @@ def timed_speech(text: str, velocity: float):
         stdout.write(character)
         stdout.flush()
         sleep(velocity)
+        # This function will be used to create texts in prompt with control speed
 
 
 # Player Setup
@@ -37,6 +40,7 @@ class Player(object):
             print('\n' + 'You have moved to the ' + destination + '.')
             self.position = destination
             print_position()
+        # This function will be in charged to move the player around the map
 
     def player_move(self, direction):
         # One word input
@@ -50,12 +54,15 @@ class Player(object):
             if destination in ['up', 'north']:
                 destination = zone_map_keys[self.position].UP
                 self.movement_handler(destination)
+
             elif destination in ['down', 'south']:
                 destination = zone_map_keys[self.position].DOWN
                 self.movement_handler(destination)
+
             elif destination in ['left', 'west']:
                 destination = zone_map_keys[self.position].LEFT
                 self.movement_handler(destination)
+
             elif destination in ['right', 'east']:
                 destination = zone_map_keys[self.position].RIGHT
                 self.movement_handler(destination)
@@ -67,30 +74,43 @@ class Player(object):
             if destination in ['up', 'north']:
                 destination = zone_map_keys[self.position].UP
                 self.movement_handler(destination)
+
             elif destination in ['down', 'south']:
                 destination = zone_map_keys[self.position].DOWN
                 self.movement_handler(destination)
+
             elif destination in ['left', 'west']:
                 destination = zone_map_keys[self.position].LEFT
                 self.movement_handler(destination)
+
             elif destination in ['right', 'east']:
                 destination = zone_map_keys[self.position].RIGHT
                 self.movement_handler(destination)
         else:
             print('Invalid direction.\n')
 
-    def player_examine(self, referredItem):
+        # This function will take the input to move from the player to move the character
+
+    def player_examine(self, referredItem: str):
         if zone_map_keys[self.position].SOLVED is False:
             if referredItem == '':
                 print(zone_map_keys[self.position].EXAMINATION)
+                # Examination of the room
+
             elif referredItem in zone_map_keys[self.position].ELEMENTS:
                 print(zone_map_keys[self.position].ELEMENTS[referredItem]['description'])
+                # Examination of some element in the room
+
             elif referredItem in zone_map_keys[self.position].ITEMS:
                 print(zone_map_keys[self.position].ITEMS[referredItem]['description'])
+                # Examination of some item in the room
+
             else:
                 print('The referred item "' + referredItem + '" does not exist in this room.')
         else:
             print('You have already exhausted this zone.')
+
+        # This function will allow the player to interact with the map
 
     def player_use_item(self, referredItem):
         # Decides if he will use the item from inventory or from the zone
@@ -148,7 +168,7 @@ class Player(object):
             else:
                 # Can be 'healing', 'remove side effect A', 'remove side effect B', 'stronger body', etc
                 if verify_item['effects'] == 'healing':
-                    if self.hp in [60, 70, 90]:     # HP of priest, rogue and warrior
+                    if self.hp in [60, 70, 90]:  # HP of priest, rogue and warrior
                         print('You feel fine by now, better saved for later.')
                     else:
                         amount = randint(1, 10)
