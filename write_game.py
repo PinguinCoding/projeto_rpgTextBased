@@ -9,7 +9,9 @@ from random import randint  # Will be used to add random elements to the game
 # Recurrent Functions
 def clear_screen():
     system('cls')
-    # This function will always be used when the screen needed to be clean
+
+
+# This function will be used when the screen needed to be clean
 
 
 def timed_speech(text: str, velocity: float):
@@ -17,21 +19,33 @@ def timed_speech(text: str, velocity: float):
         stdout.write(character)
         stdout.flush()
         sleep(velocity)
-        # This function will be used to create texts in prompt with control speed
+
+
+# This function will be used to create texts in prompt with control speed
 
 
 # Player Setup
 class Player(object):
     def __init__(self):
-        self.name = ''
-        self.role = ''
+        """
+        Explaining the attributes from this class:
+        NAME --> It's a constant that holds the player's chosen name: str
+        ROLE --> It's a constant that holds tha player's chosen role: str
+        hp --> It's a variable that holds the player's health points: int
+        inventory --> It's a dictionary that holds the player's items from two classifications; 'key_item' and 'useful_item': dict
+        status_effect --> It's a list that displays the player's status effects: list
+        position --> It's a variable tha keeps track of the player's position: str
+        game_over --> It's a variable that tells when the game ends as the player's hp hits 0: bool
+        """
+        self.NAME = ''
+        self.ROLE = ''
         self.hp = 0
         self.inventory = {'key_items': list(), 'useful_items': list()}
-        self.amount_dices = 0
-        self.dices = []
         self.status_effect = []
         self.position = 'b2'
         self.game_over = False
+
+    # This function initiate the class 'Player'
 
     def movement_handler(self, destination: str):
         if destination is None:
@@ -40,10 +54,11 @@ class Player(object):
             print('\n' + 'You have moved to the ' + destination + '.')
             self.position = destination
             print_position()
-        # This function will be in charged to move the player around the map
 
-    def player_move(self, direction):
-        # One word input
+    # This function will be in charged to move the player around the map
+
+    def player_move(self, direction: str):
+        # Deals with a one word input
         if direction == '':
             ask = 'Where would you like to move to?\n> '
             destination = (input(ask)).lower().strip()
@@ -67,7 +82,7 @@ class Player(object):
                 destination = zone_map_keys[self.position].RIGHT
                 self.movement_handler(destination)
 
-        # Two word input
+        # Deals with a two word input
         elif direction in ['up', 'north', 'down', 'south', 'left', 'west', 'right', 'east']:
             destination = direction
 
@@ -89,85 +104,102 @@ class Player(object):
         else:
             print('Invalid direction.\n')
 
-        # This function will take the input to move from the player to move the character
+    # This function will take the input to move from the player to move the character
 
     def player_examine(self, referredItem: str):
-        if zone_map_keys[self.position].SOLVED is False:
+        if zone_map_keys[self.position].solved is False:
             if referredItem == '':
                 print(zone_map_keys[self.position].EXAMINATION)
                 # Examination of the room
 
             elif referredItem in zone_map_keys[self.position].ELEMENTS:
                 print(zone_map_keys[self.position].ELEMENTS[referredItem]['description'])
-                # Examination of some element in the room
+                # Examination of some element in the room (OBS: Elements can't be pick up by the player)
 
             elif referredItem in zone_map_keys[self.position].ITEMS:
                 print(zone_map_keys[self.position].ITEMS[referredItem]['description'])
-                # Examination of some item in the room
+                # Examination of some item in the room (OBS: Item can be pick up by the player)
 
             else:
                 print('The referred item "' + referredItem + '" does not exist in this room.')
         else:
             print('You have already exhausted this zone.')
 
-        # This function will allow the player to interact with the map
+    # This function will allow the player to interact with the map
 
-    def player_use_item(self, referredItem):
-        # Decides if he will use the item from inventory or from the zone
+    def search_inventory(self, searchedItem: str):
+        for item in self.inventory['key_items']:
+            if item['nameDisplay'] == searchedItem:
+                return item
+
+        # Item was not found in 'key_items'
+        for item in self.inventory['useful_items']:
+            if item['nameDisplay'] == searchedItem:
+                return item
+
+        # Item was not found in neither
+        return None
+
+    # This function will search an item from the player inventory in both the 'key_items' and 'useful_items'
+
+    def player_use_item(self, referredItem: str):
+        # Decides if player will use the item from inventory or from the zone he's in
         if referredItem == '':
             ask1 = 'What would you like to use?\n> '
             item = (input(ask1)).lower().strip()
+            # Input item
+
             ask2 = 'You would like to use the ' + item + ' from where?\n> '
             print('[Zone] or [Inventory]')
             local = (input(ask2)).lower().strip()
+            # Input location
+
             while local not in ['zone', 'inventory']:
                 print('Write a valid location to use the item from.')
+                print('=' * 24)
                 local = (input(ask2)).lower().strip()
+
             if local == 'zone':
                 self.player_use_item_from_zone(item)
-            elif local == 'inventory':
+            else:
                 self.player_use_item_from_inventory(item)
         else:
             ask = 'You would like to use the ' + referredItem + ' from where?\n> '
             print('[Zone] or [Inventory]')
             local = (input(ask)).lower().strip()
+            # Input location
+
             while local not in ['zone', 'inventory']:
                 print('Write a valid location to use the item from.')
                 print('=' * 24)
                 local = (input(ask)).lower().strip()
+
             if local == 'zone':
                 self.player_use_item_from_zone(referredItem)
-            elif local == 'inventory':
+            else:
                 self.player_use_item_from_inventory(referredItem)
 
-    def player_use_item_from_inventory(self, referredItem):
-        # Search item in inventory
-        verify_item = dict()
-        for index in self.inventory['key_items']:
-            if index['nameDisplay'] == referredItem:
-                verify_item = index
-        if verify_item == dict():
-            for index in self.inventory['useful_items']:
-                if index['nameDisplay'] == referredItem:
-                    verify_item = index
-        # Using the item
-        if verify_item == dict():
+    # This function will filtrate the place from where the player is trying to use the item from
+
+    def player_use_item_from_inventory(self, referredItem: str):
+        item = self.search_inventory(referredItem)
+
+        if item is None:
             print('There is no such an item in your possession to be used here.')
         else:
-            # The item will be used to solve a puzzle
-            if verify_item['classification'] == 'key_item':
-                if verify_item['conditionUse']():
-                    print(verify_item['whenUsed'])
+            if item['classification'] == 'key_item':  # The item will be used to solve a puzzle
+                if item['conditionUse']():
+                    print(item['whenUsed'])
                     print('After used, the ' + referredItem + ' was swallow by darkness.')
-                    self.inventory['key_items'].remove(verify_item)
+                    self.inventory['key_items'].remove(item)
                     zone_map_keys[self.position].zone_change(referredItem)
-                    zone_map_keys[self.position].SOLVED = True
+                    zone_map_keys[self.position].solved = True
                 else:
                     print('You cannot use this item here.')
-            # The item will be used to change player status
-            else:
-                # Can be 'healing', 'remove side effect A', 'remove side effect B', 'stronger body', etc
-                if verify_item['effects'] == 'healing':
+
+            else:  # The item will be used to change player status
+                # Effects can be 'healing', 'remove side effect A', 'remove side effect B', 'stronger body', etc
+                if item['effects'] == 'healing':
                     if self.hp in [60, 70, 90]:  # HP of priest, rogue and warrior
                         print('You feel fine by now, better saved for later.')
                     else:
@@ -176,89 +208,97 @@ class Player(object):
                         print('You use the ' + referredItem + ' to heal your body.')
                         sleep(0.3)
                         print('You feel better now.')
-                        self.inventory['useful_items'].remove(verify_item)
+                        self.inventory['useful_items'].remove(item)
                         zone_map_keys[self.position].zone_change(referredItem)
 
-    def player_use_item_from_zone(self, referredItem):
-        if zone_map_keys[self.position].SOLVED is False:
+    # This function will allow the player to use an item from his inventory
+
+    def player_use_item_from_zone(self, referredItem: str):
+        if zone_map_keys[self.position].solved is False:
             if referredItem not in zone_map_keys[self.position].ELEMENTS:
                 print('There is nothing like that to use here.')
+
             elif zone_map_keys[self.position].ELEMENTS[referredItem]['wasUsed'] is False:
                 print(zone_map_keys[self.position].ELEMENTS[referredItem]['narration'])
                 zone_map_keys[self.position].ELEMENTS[referredItem]['wasUsed'] = True
                 zone_map_keys[self.position].zone_change(referredItem)
+
             else:
                 print('You already use the ' + referredItem + '.')
         else:
             print('You have already done everything possible here.')
 
-    def collect_item(self, referredItem):
+    # This function will allow the player to use an element from the zone he's in
+
+    def collect_item(self, referredItem: str):
         if referredItem == '':
             ask = 'What would you like to take from this room?\n> '
             item = (input(ask)).lower().strip()
+
             if item not in zone_map_keys[self.position].ITEMS:
                 print('There is nothing like that laying in the room.')
             else:
                 item_dict = zone_map_keys[self.position].ITEMS[item]
                 print(item_dict['whenGrabbed'])
+
                 if item_dict['classification'] == 'key_item':
                     self.inventory['key_items'].append(item_dict)
                 else:
                     self.inventory['useful_items'].append(item_dict)
-                zone_map_keys[self.position].zone_change(item)
+
+                zone_map_keys[self.position].zone_change(item)  # This line updates the map
         else:
             if referredItem not in zone_map_keys[self.position].ITEMS:
                 print('There is nothing like that laying in the room.')
             else:
                 item_dict = zone_map_keys[self.position].ITEMS[referredItem]
                 print(item_dict['whenGrabbed'])
+
                 if item_dict['classification'] == 'key_item':
                     self.inventory['key_items'].append(item_dict)
                 else:
                     self.inventory['useful_items'].append(item_dict)
-                zone_map_keys[self.position].zone_change(referredItem)
 
-    def drop_item(self, referredItem):
+                zone_map_keys[self.position].zone_change(referredItem)  # This line updates the map
+
+    # This function will allow the player to collect items from the zone he's in
+
+    def drop_item(self, referredItem: str):
         if referredItem == '':
             ask = 'What item would you like to leave behind?\n(Remember that only not important items can' \
                   'be left behind and once you dispose of one, it can never take back.\n> '
+
+            # Show inventory before item can be dropped
             print('=' * 24)
             self.view_inventory()
             print('=' * 24)
+
+            # Take input
             item = (input(ask)).lower().strip()
-            verify_item = dict()
-            for index in self.inventory['key_items']:
-                if index['nameDisplay'] == item:
-                    verify_item = index
-            if verify_item != dict():
+
+            # Search the item
+            verify_item = self.search_inventory(item)
+
+            if verify_item is None:
+                print('There is no such an item in your possession.')
+            elif verify_item['classification'] == 'key_item':
                 print('You cannot let go of such an important item.')
             else:
-                item_dict = dict()
-                for index in self.inventory['useful_items']:
-                    if index['nameDisplay'] == item:
-                        item_dict = index
-                if item_dict not in self.inventory['useful_items']:
-                    print('There is no such an item in your possession.')
-                else:
-                    self.inventory['useful_items'].remove(item_dict)
-                    print('The ' + item + ' was left behind, swallowed by darkness.')
+                self.inventory['useful_items'].remove(verify_item)
+                print('The ' + item + ' was left behind, swallowed by darkness.')
         else:
-            verify_item = dict()
-            for index in self.inventory['key_items']:
-                if index['nameDisplay'] == referredItem:
-                    verify_item = index
-            if verify_item != dict():
+            # Search the item
+            verify_item = self.search_inventory(referredItem)
+
+            if verify_item is None:
+                print('There is no such an item in your possession.')
+            elif verify_item['classification'] == 'key_item':
                 print('You cannot let go of such an important item.')
             else:
-                item_dict = dict()
-                for index in self.inventory['useful_items']:
-                    if index['nameDisplay'] == referredItem:
-                        item_dict = index
-                if item_dict not in self.inventory['useful_items']:
-                    print('There is no such an item in your possession.')
-                else:
-                    self.inventory['useful_items'].remove(item_dict)
-                    print('The ' + referredItem + ' was left behind, swallowed by darkness.')
+                self.inventory['useful_items'].remove(verify_item)
+                print('The ' + referredItem + ' was left behind, swallowed by darkness.')
+
+    # This function will allow the player to drop an item from his inventory
 
     def view_inventory(self):
         if self.inventory == {'key_items': list(), 'useful_items': list()}:
@@ -269,6 +309,7 @@ class Player(object):
                 for i, item in enumerate(self.inventory[item_class]):
                     print(str(i + 1) + '.' + item['nameDisplay'])
             print()
+    # This function will allow the player to view his inventory
 
 
 myPlayer = Player()
@@ -276,11 +317,11 @@ myPlayer = Player()
 
 # Title Screen Setup
 def title_screen_select():
-    option = (input('> ')).lower()
+    option = (input('> ')).lower().strip()
 
     while option not in ['play', 'help', 'quit']:
         print('Enter a valid option please\n')
-        option = (input('> ')).lower()
+        option = (input('> ')).lower().strip()
 
     if option == 'play':
         start_game()
@@ -288,6 +329,9 @@ def title_screen_select():
         help_menu()
 
     exit()
+
+
+# This function will allow the player to navigate through the title screen
 
 
 def title_screen_display():
@@ -301,38 +345,65 @@ def title_screen_display():
     title_screen_select()
 
 
+# This function will display the tittle screen to the player
+
+
 def help_menu():
     print('#' * 24)
     print('Welcome to the Text RPG!')
     print('#' * 24)
-    print('-Use up, down, left, right to move-')
     print('-Type your commands to do them-')
-    print("-Use 'look' to inspect something-")
+    print("-Type 'move' to walk around the map-")
+    print('-Type a direction like up, down, left, right or north, south, east, west to move-')
+    print("-Type 'look' to inspect the room you are in-")
+    print("-Type some word after 'look' to inspect something specific that catches your attention-")
+    print("-Type 'view' to see the items in your inventory-")
+    print("-Type 'use' to use any item you want-")
+    print("-Type 'quit' at any time to exit the game-")
     title_screen_select()
 
 
-# Class Setup
+# This functon will display a quick guide to the player
+
+
+# Map and Zones Setups
 class Zone(object):
     def __init__(self):
-        self.ZONE_NAME = ''  # Nome da zona --> string
-        self.DESCRIPTION = ''  # Descrição da zona --> string
-        self.EXAMINATION = ''  # Observação detalhada da zona para evidenciar objetos presentes --> string
-        self.SOLVED = False  # Condição do puzzle da zona --> bool
-        self.ELEMENTS = {}  # Objetos presentes na zona --> dicionário
-        self.CHANGES = {}  # Mudanças que a sala passa conforme puzzles são resolvidos --> dicionário
-        self.ITEMS = {}  # Item que podem ser coletados na zona --> dicionário
-        self.UP = ''  # Zona acima --> string
-        self.DOWN = ''  # Zona abaixo --> string
-        self.LEFT = ''  # Zona a esquerda --> string
-        self.RIGHT = ''  # Zona a direita --> string
+        """
+        Explaining the attributes from this class:
+        ZONE_NAME --> It's the name of the zone: str
+        DESCRIPTION --> It's the zone description the shows when entered: str
+        EXAMINATION --> It's the zone description when inspect by the player: str
+        ELEMENTS --> It's a dictionary containing all the elements of the zone: dict
+        CHANGES --> It's the zone description after it's been change by some item/element use: str
+        ITEMS --> It's a dictionary containing all the items of the zone: dict
+        UP --> It's the room pointer to the zone directly above: str
+        DOWN --> It's the room pointer to  the zone directly bellow: str
+        LEFT --> It's the room pointer to the zone directly at left: str
+        RIGHT --> It's the room pointer to the zone directly at right: str
+        solved --> It's a variable that shows if the puzzle of the room has be solved or not: bool
+        """
+        self.ZONE_NAME = ''
+        self.DESCRIPTION = ''
+        self.EXAMINATION = ''
+        self.ELEMENTS = {}
+        self.CHANGES = {}
+        self.ITEMS = {}
+        self.UP = ''
+        self.DOWN = ''
+        self.LEFT = ''
+        self.RIGHT = ''
+        self.solved = False
+
+    # This function initiate the class 'Zone'
 
     def zone_change(self, referredItem):
         self.EXAMINATION = self.CHANGES[referredItem]
+    # This function changes a zone 'EXAMINATION'
 
 
-# Map Setup
-# Player starts at b2 location
-# Map representation (matriz):
+# OBS: The player initiate at the 'b2' position
+# Map representation:
 '''
 -------------
 |a1|a2|a3|a4| 
@@ -350,7 +421,7 @@ LEFT      RIGHT
      DOWN
 '''
 
-# Creating the zones
+# Creating the zones as objects
 a1 = Zone()
 a2 = Zone()
 a3 = Zone()
@@ -371,7 +442,7 @@ d2 = Zone()
 d3 = Zone()
 d4 = Zone()
 
-# Setting the attributes from each zone
+# Configuration of each zone
 # 'a' zones
 a1.ZONE_NAME = 'Dark Cell'
 a1.DESCRIPTION = 'A room filled with nothing but darkness.'
@@ -456,7 +527,6 @@ b3.DOWN = 'c3'
 b3.LEFT = 'b2'
 b3.RIGHT = 'b4'
 b3.CHANGES = {'small key': 'The door is laying wide open.'}
-# zona.CHANGES = {'<object that caused the change>': '<new examination of the room>'}
 
 b4.ZONE_NAME = 'Dark room'
 b4.DESCRIPTION = 'A room filled with nothing but darkness.'
@@ -532,7 +602,7 @@ d4.DOWN = None
 d4.LEFT = 'd3'
 d4.RIGHT = None
 
-# Hold of zones
+# Creating a dictionary to easily access the zones attributes
 zone_map_keys = {
     'a1': a1, 'a2': a2, 'a3': a3, 'a4': a4,
     'b1': b1, 'b2': b2, 'b3': b3, 'b4': b4,
@@ -546,7 +616,7 @@ def setup_game():
     question = 'Enter the name of the prisoner. \n'
     timed_speech(question, 0.05)
     player_name = (input('> ')).capitalize()
-    myPlayer.name = player_name
+    myPlayer.NAME = player_name
 
     # Collect role from the player
     question = 'Enter the role of the prisoner. \n(You can play as a warrior, rogue or priest)\n'
@@ -558,29 +628,30 @@ def setup_game():
         print('Enter a valid role.\n')
         player_role = (input('> ')).lower()
 
-    myPlayer.role = player_role
+    myPlayer.ROLE = player_role
     print('The prisoner used to be a ' + player_role + '.\n')
 
-    # Defining player stats
-    if myPlayer.role == 'warrior':
+    # Defining player status
+    if myPlayer.ROLE == 'warrior':
         myPlayer.hp = 90
-        myPlayer.amount_dices = 8
 
-    elif myPlayer.role == 'rogue':
+    elif myPlayer.ROLE == 'rogue':
         myPlayer.hp = 70
-        myPlayer.amount_dices = 5
 
-    elif myPlayer.role == 'priest':
+    elif myPlayer.ROLE == 'priest':
         myPlayer.hp = 60
-        myPlayer.amount_dices = 3
+# This function will set up the game before starting it
+
+# ==GAME SETUPS ENDS== #
 
 
-# GAME INTERACTIVITY
+# ==GAME INTERACTIVITY== #
 def print_position():
     print('\n' + ('#' * (4 + len(myPlayer.position))))
     print('# ' + myPlayer.position.upper() + ' #')
     print('# ' + zone_map_keys[myPlayer.position].DESCRIPTION + ' #')
     print('\n' + ('#' * (4 + len(myPlayer.position))))
+# This function will print the position of the player
 
 
 def prompt():
@@ -589,9 +660,13 @@ def prompt():
     print('\n' + '=' * 24)
     print('What would you like to do?')
     action = (input('> ')).lower().strip()
+
+    # Dealing with a two words input
     if ' ' in action:
         actionVerb = action[:action.index(' ')].strip()
         actionObj = action[action.index(' '):].strip()
+
+    # Dealing with a one word input
     else:
         actionVerb = action
         actionObj = ''
@@ -599,6 +674,8 @@ def prompt():
     while actionVerb not in acceptable_actions:
         print('Unknown action, try again.\n')
         action = (input('> ')).lower().strip()
+
+        # Same from above
         if ' ' in action:
             actionVerb = action[:action.index(' ')].strip()
             actionObj = action[action.index(' '):].strip()
@@ -608,49 +685,59 @@ def prompt():
 
     if actionVerb == 'quit':
         exit()
+
     elif actionVerb in ['go', 'move', 'travel', 'walk']:
         myPlayer.player_move(actionObj)
+
     elif actionVerb in ['look', 'examine', 'inspect', 'interact']:
         myPlayer.player_examine(actionObj)
+
     elif actionVerb == 'use':
         myPlayer.player_use_item(actionObj)
+
     elif actionVerb in ['grab', 'collect', 'take']:
         myPlayer.collect_item(actionObj)
+
     elif actionVerb in ['trow', 'drop']:
         myPlayer.drop_item(actionObj)
+
     elif actionVerb == 'view':
         myPlayer.view_inventory()
+# This function will be the main interactivity with the game, the prompt asking him actions
+
+# ==GAME INTERACTIVITY ENDS== #
 
 
-# GAME FUNCTIONALITY
+# ==GAME FUNCTIONALITY== #
 def main_game_loop():
     while not myPlayer.game_over:
         prompt()
+# This function will keep the main game loop running
 
 
 def start_game():
     clear_screen()
     setup_game()
 
-    # Play introduction
-    quote = 'Welcome, ' + myPlayer.name + ' the prisoner and ex-' + myPlayer.role + '.\n'
+    # Play the game introduction
+    quote = 'Welcome, ' + myPlayer.NAME + ' the prisoner and ex-' + myPlayer.ROLE + '.\n'
     timed_speech(quote, 0.05)
 
     speech1 = 'Welcome to this fantasy world!\n'
     speech2 = 'I hope it greets you well\n'
     speech3 = 'Just make sure you do not get to lost...\n'
     speech4 = 'Heheheh...\n'
+    speech5 = '# Let the journey begin... #'
 
     timed_speech(speech1, 0.03)
     timed_speech(speech2, 0.03)
     timed_speech(speech3, 0.1)
     timed_speech(speech4, 0.2)
+    timed_speech(speech5, 0.1)
 
     clear_screen()
-    print('#' * 20)
-    print('# Let the journey begin... #')
-    print('#' * 20)
     main_game_loop()
+# This function will start the game
 
 
 title_screen_display()
