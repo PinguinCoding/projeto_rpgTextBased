@@ -1,3 +1,6 @@
+# This file contains the first prototype of the game, the functions here will be adapted to other
+# files and this file will serve only as reference for development purpose
+
 # ==GAME IMPORTATION BLOCK== #
 from sys import exit, stdout  # Will be used to exit prompt and to control text speed
 from time import sleep  # Will be used to control text speed
@@ -7,14 +10,14 @@ from random import randint  # Will be used to add random elements to the game
 
 # ==GAME SETUPS== #
 # Recurrent Functions
-def clear_screen():
+def void_clear_screen_gmf():
     system('cls')
 
 
 # This function will be used when the screen needed to be clean
 
 
-def timed_speech(text: str, velocity: float):
+def void_speech_gmf(text: str, velocity: float):
     for character in text:
         stdout.write(character)
         stdout.flush()
@@ -47,17 +50,17 @@ class Player(object):
 
     # This function initiate the class 'Player'
 
-    def movement_handler(self, destination: str):
+    def player_move_character_gmf(self, destination: str):
         if destination is None:
             print('You cannot go there.')
         else:
             print('\n' + 'You have moved to the ' + destination + '.')
             self.position = destination
-            print_position()
+            void_print_position_gmd()
 
     # This function will be in charged to move the player around the map
 
-    def player_move(self, direction: str):
+    def player_input_to_move_gmi(self, direction: str):
         # Deals with a one word input
         if direction == '':
             ask = 'Where would you like to move to?\n> '
@@ -68,19 +71,19 @@ class Player(object):
 
             if destination in ['up', 'north']:
                 destination = zone_map_keys[self.position].UP
-                self.movement_handler(destination)
+                self.player_move_character_gmf(destination)
 
             elif destination in ['down', 'south']:
                 destination = zone_map_keys[self.position].DOWN
-                self.movement_handler(destination)
+                self.player_move_character_gmf(destination)
 
             elif destination in ['left', 'west']:
                 destination = zone_map_keys[self.position].LEFT
-                self.movement_handler(destination)
+                self.player_move_character_gmf(destination)
 
             elif destination in ['right', 'east']:
                 destination = zone_map_keys[self.position].RIGHT
-                self.movement_handler(destination)
+                self.player_move_character_gmf(destination)
 
         # Deals with a two word input
         elif direction in ['up', 'north', 'down', 'south', 'left', 'west', 'right', 'east']:
@@ -88,25 +91,25 @@ class Player(object):
 
             if destination in ['up', 'north']:
                 destination = zone_map_keys[self.position].UP
-                self.movement_handler(destination)
+                self.player_move_character_gmf(destination)
 
             elif destination in ['down', 'south']:
                 destination = zone_map_keys[self.position].DOWN
-                self.movement_handler(destination)
+                self.player_move_character_gmf(destination)
 
             elif destination in ['left', 'west']:
                 destination = zone_map_keys[self.position].LEFT
-                self.movement_handler(destination)
+                self.player_move_character_gmf(destination)
 
             elif destination in ['right', 'east']:
                 destination = zone_map_keys[self.position].RIGHT
-                self.movement_handler(destination)
+                self.player_move_character_gmf(destination)
         else:
             print('Invalid direction.\n')
 
     # This function will take the input to move from the player to move the character
 
-    def player_examine(self, referredItem: str):
+    def player_examine_zone_gmf(self, referredItem: str):
         if zone_map_keys[self.position].solved is False:
             if referredItem == '':
                 print(zone_map_keys[self.position].EXAMINATION)
@@ -127,7 +130,7 @@ class Player(object):
 
     # This function will allow the player to interact with the map
 
-    def search_inventory(self, searchedItem: str):
+    def player_search_inventory_gmf(self, searchedItem: str):
         for item in self.inventory['key_items']:
             if item['nameDisplay'] == searchedItem:
                 return item
@@ -142,7 +145,7 @@ class Player(object):
 
     # This function will search an item from the player inventory in both the 'key_items' and 'useful_items'
 
-    def player_use_item(self, referredItem: str):
+    def player_input_to_use_gmi(self, referredItem: str):
         # Decides if player will use the item from inventory or from the zone he's in
         if referredItem == '':
             ask1 = 'What would you like to use?\n> '
@@ -160,9 +163,9 @@ class Player(object):
                 local = (input(ask2)).lower().strip()
 
             if local == 'zone':
-                self.player_use_item_from_zone(item)
+                self.player_use_element_gmf(item)
             else:
-                self.player_use_item_from_inventory(item)
+                self.player_use_item_gmf(item)
         else:
             ask = 'You would like to use the ' + referredItem + ' from where?\n> '
             print('[Zone] or [Inventory]')
@@ -175,14 +178,14 @@ class Player(object):
                 local = (input(ask)).lower().strip()
 
             if local == 'zone':
-                self.player_use_item_from_zone(referredItem)
+                self.player_use_element_gmf(referredItem)
             else:
-                self.player_use_item_from_inventory(referredItem)
+                self.player_use_item_gmf(referredItem)
 
     # This function will filtrate the place from where the player is trying to use the item from
 
-    def player_use_item_from_inventory(self, referredItem: str):
-        item = self.search_inventory(referredItem)
+    def player_use_item_gmf(self, referredItem: str):
+        item = self.player_search_inventory_gmf(referredItem)
 
         if item is None:
             print('There is no such an item in your possession to be used here.')
@@ -192,7 +195,7 @@ class Player(object):
                     print(item['whenUsed'])
                     print('After used, the ' + referredItem + ' was swallow by darkness.')
                     self.inventory['key_items'].remove(item)
-                    zone_map_keys[self.position].zone_change(referredItem)
+                    zone_map_keys[self.position].zone_state_change_gmf(referredItem)
                     zone_map_keys[self.position].solved = True
                 else:
                     print('You cannot use this item here.')
@@ -209,11 +212,11 @@ class Player(object):
                         sleep(0.3)
                         print('You feel better now.')
                         self.inventory['useful_items'].remove(item)
-                        zone_map_keys[self.position].zone_change(referredItem)
+                        zone_map_keys[self.position].zone_state_change_gmf(referredItem)
 
     # This function will allow the player to use an item from his inventory
 
-    def player_use_item_from_zone(self, referredItem: str):
+    def player_use_element_gmf(self, referredItem: str):
         if zone_map_keys[self.position].solved is False:
             if referredItem not in zone_map_keys[self.position].ELEMENTS:
                 print('There is nothing like that to use here.')
@@ -221,7 +224,7 @@ class Player(object):
             elif zone_map_keys[self.position].ELEMENTS[referredItem]['wasUsed'] is False:
                 print(zone_map_keys[self.position].ELEMENTS[referredItem]['narration'])
                 zone_map_keys[self.position].ELEMENTS[referredItem]['wasUsed'] = True
-                zone_map_keys[self.position].zone_change(referredItem)
+                zone_map_keys[self.position].zone_state_change_gmf(referredItem)
 
             else:
                 print('You already use the ' + referredItem + '.')
@@ -230,7 +233,7 @@ class Player(object):
 
     # This function will allow the player to use an element from the zone he's in
 
-    def collect_item(self, referredItem: str):
+    def player_collect_item_gmi(self, referredItem: str):
         if referredItem == '':
             ask = 'What would you like to take from this room?\n> '
             item = (input(ask)).lower().strip()
@@ -246,7 +249,7 @@ class Player(object):
                 else:
                     self.inventory['useful_items'].append(item_dict)
 
-                zone_map_keys[self.position].zone_change(item)  # This line updates the map
+                zone_map_keys[self.position].zone_state_change_gmf(item)  # This line updates the map
         else:
             if referredItem not in zone_map_keys[self.position].ITEMS:
                 print('There is nothing like that laying in the room.')
@@ -259,25 +262,25 @@ class Player(object):
                 else:
                     self.inventory['useful_items'].append(item_dict)
 
-                zone_map_keys[self.position].zone_change(referredItem)  # This line updates the map
+                zone_map_keys[self.position].zone_state_change_gmf(referredItem)  # This line updates the map
 
     # This function will allow the player to collect items from the zone he's in
 
-    def drop_item(self, referredItem: str):
+    def player_drop_item_gmi(self, referredItem: str):
         if referredItem == '':
             ask = 'What item would you like to leave behind?\n(Remember that only not important items can' \
                   'be left behind and once you dispose of one, it can never take back.\n> '
 
             # Show inventory before item can be dropped
             print('=' * 24)
-            self.view_inventory()
+            self.player_visualize_inventory_gmf()
             print('=' * 24)
 
             # Take input
             item = (input(ask)).lower().strip()
 
             # Search the item
-            verify_item = self.search_inventory(item)
+            verify_item = self.player_search_inventory_gmf(item)
 
             if verify_item is None:
                 print('There is no such an item in your possession.')
@@ -288,7 +291,7 @@ class Player(object):
                 print('The ' + item + ' was left behind, swallowed by darkness.')
         else:
             # Search the item
-            verify_item = self.search_inventory(referredItem)
+            verify_item = self.player_search_inventory_gmf(referredItem)
 
             if verify_item is None:
                 print('There is no such an item in your possession.')
@@ -300,7 +303,7 @@ class Player(object):
 
     # This function will allow the player to drop an item from his inventory
 
-    def view_inventory(self):
+    def player_visualize_inventory_gmf(self):
         if self.inventory == {'key_items': list(), 'useful_items': list()}:
             print('You carried nothing.')
         else:
@@ -309,6 +312,7 @@ class Player(object):
                 for i, item in enumerate(self.inventory[item_class]):
                     print(str(i + 1) + '.' + item['nameDisplay'])
             print()
+
     # This function will allow the player to view his inventory
 
 
@@ -316,7 +320,7 @@ myPlayer = Player()
 
 
 # Title Screen Setup
-def title_screen_select():
+def void_tittle_screen_select_gmi():
     option = (input('> ')).lower().strip()
 
     while option not in ['play', 'help', 'quit']:
@@ -324,9 +328,9 @@ def title_screen_select():
         option = (input('> ')).lower().strip()
 
     if option == 'play':
-        start_game()
+        void_start_game_gmf()
     elif option == 'help':
-        help_menu()
+        void_help_menu_display_gmd()
 
     exit()
 
@@ -334,21 +338,21 @@ def title_screen_select():
 # This function will allow the player to navigate through the title screen
 
 
-def title_screen_display():
-    clear_screen()
+def void_tittle_screen_display_gmd():
+    void_clear_screen_gmf()
     print('#' * 24)
     print('Welcome to the Text RPG!')
     print('#' * 24)
     print('' * 9, '-Play-', '' * 9)
     print('' * 9, '-Help-', '' * 9)
     print('' * 9, '-Quit-', '' * 9)
-    title_screen_select()
+    void_tittle_screen_select_gmi()
 
 
 # This function will display the tittle screen to the player
 
 
-def help_menu():
+def void_help_menu_display_gmd():
     print('#' * 24)
     print('Welcome to the Text RPG!')
     print('#' * 24)
@@ -360,7 +364,7 @@ def help_menu():
     print("-Type 'view' to see the items in your inventory-")
     print("-Type 'use' to use any item you want-")
     print("-Type 'quit' at any time to exit the game-")
-    title_screen_select()
+    void_tittle_screen_select_gmi()
 
 
 # This functon will display a quick guide to the player
@@ -377,6 +381,7 @@ class Zone(object):
         ELEMENTS --> It's a dictionary containing all the elements of the zone: dict
         CHANGES --> It's the zone description after it's been change by some item/element use: str
         ITEMS --> It's a dictionary containing all the items of the zone: dict
+        NPCS --> It's a dictionary ---
         UP --> It's the room pointer to the zone directly above: str
         DOWN --> It's the room pointer to  the zone directly bellow: str
         LEFT --> It's the room pointer to the zone directly at left: str
@@ -389,6 +394,7 @@ class Zone(object):
         self.ELEMENTS = {}
         self.CHANGES = {}
         self.ITEMS = {}
+        self.NPCS = {}
         self.UP = ''
         self.DOWN = ''
         self.LEFT = ''
@@ -397,7 +403,7 @@ class Zone(object):
 
     # This function initiate the class 'Zone'
 
-    def zone_change(self, referredItem):
+    def zone_state_change_gmf(self, referredItem):
         self.EXAMINATION = self.CHANGES[referredItem]
     # This function changes a zone 'EXAMINATION'
 
@@ -442,6 +448,33 @@ d2 = Zone()
 d3 = Zone()
 d4 = Zone()
 
+# Items dictionary
+items = {'bandage': {'nameDisplay': 'bandage',
+                     'description': 'A dirty bandage, it can be used to stop the bleeding.',
+                     'whenGrabbed': 'You bend down and grab it.',
+                     'whenUsed': 'You use the bandage to recover from your wounds.',
+                     'wasUsed': False,
+                     'conditionUse': None,
+                     'classification': 'useful_item',
+                     'effects': 'healing'},
+         'small key': {'nameDisplay': 'small key',
+                       'description': 'A small glowing key, it probably can be use to open a door.',
+                       'whenGrabbed': 'You bend down and grab it.',
+                       'whenUsed': 'You use the key to open the door, it works!',
+                       'wasUsed': False,
+                       'conditionUse': lambda: myPlayer.position == 'b3',
+                       'classification': 'key_item',
+                       'effects': None},
+         'health potion': {'nameDisplay': 'health potion',
+                           'description': 'A small red potion, it stinks.',
+                           'whenGrabbed': 'You bend down and grab it.',
+                           'whenUsed': 'You drink the potion, it taste awful, but you feel better in a second.',
+                           'wasUsed': False,
+                           'conditionUse': None,
+                           'classification': 'useful_item',
+                           'effects': 'healing'}
+         }
+
 # Configuration of each zone
 # 'a' zones
 a1.ZONE_NAME = 'Dark Cell'
@@ -465,6 +498,22 @@ a2.UP = None
 a2.DOWN = 'b2'
 a2.LEFT = 'a1'
 a2.RIGHT = 'a3'
+a2.NPCS = {'name': 'Helm',
+           'description': 'You see and old man, sitting in the floor. He is skinny and look weak to you, '
+                          'he is whispering something you cannot hear.',
+           'repetitive': ['Broke...', '...', 'Chains...', 'Free me...'],
+           'main-dialogue': 'Thank you so much, you broke those chains, have you not? I am free now, you see, here.'
+                            'Take this, it may be useful to you. Now, see you later prisoner.',
+           'after-dialogue': 'He is not going to talk to you again.',
+           'item-given': items['health potion'],
+           'condition': lambda: a1.solved is True}
+# name == the NPC's name
+# description == the NPC's description when the player use 'inspect' or similar
+# repetitive == the NPC's random lines when the conditions to unlock his main dialogue still is unmatched
+# main-dialogue == the NPC's main dialogue
+# after-dialogue == the NPC's dialogue once he talked to the player
+# item-given == the NPC's item he gives the player
+# condition == the NPC's condition to unlock his main dialogue sequence
 
 a3.ZONE_NAME = 'Dark room'
 a3.DESCRIPTION = 'A room filled with nothing but darkness.'
@@ -490,15 +539,7 @@ b1.UP = 'a1'
 b1.DOWN = 'c1'
 b1.LEFT = None
 b1.RIGHT = 'b2'
-b1.ITEMS = {'bandage': {'nameDisplay': 'bandage',
-                        'description': 'A dirty bandage, it can be used to stop the bleeding.',
-                        'whenGrabbed': 'You bend down and grab it.',
-                        'whenUsed': 'You use the bandage to recover from your wounds.',
-                        'wasUsed': False,
-                        'conditionUse': None,
-                        'classification': 'useful_item',
-                        'effects': 'healing'}
-            }
+b1.ITEMS = {items['bandage']}
 b1.CHANGES = {'bandage': 'The room where you toke the bandage, it seems more empty now.'}
 
 b2.ZONE_NAME = 'Dark room'
@@ -508,15 +549,7 @@ b2.UP = 'a2'
 b2.DOWN = 'c2'
 b2.LEFT = 'b1'
 b2.RIGHT = 'b3'
-b2.ITEMS = {'small key': {'nameDisplay': 'small key',
-                          'description': 'A small glowing key, it probably can be use to open a door.',
-                          'whenGrabbed': 'You bend down and grab it.',
-                          'whenUsed': 'You use the key to open the door, it works!',
-                          'wasUsed': False,
-                          'conditionUse': lambda: myPlayer.position == 'b3',
-                          'classification': 'key_item',
-                          'effects': None}
-            }
+b2.ITEMS = {items['small key']}
 b2.CHANGES = {'small key': 'The room where you toke the key, it seems more empty now.'}
 
 b3.ZONE_NAME = 'Dark room'
@@ -611,16 +644,16 @@ zone_map_keys = {
 }
 
 
-def setup_game():
+def void_setup_game_gmi():
     # Collect name from the player
     question = 'Enter the name of the prisoner. \n'
-    timed_speech(question, 0.05)
+    void_speech_gmf(question, 0.05)
     player_name = (input('> ')).capitalize()
     myPlayer.NAME = player_name
 
     # Collect role from the player
     question = 'Enter the role of the prisoner. \n(You can play as a warrior, rogue or priest)\n'
-    timed_speech(question, 0.05)
+    void_speech_gmf(question, 0.05)
     player_role = (input('> ')).lower()
     valid_roles = ['warrior', 'rogue', 'priest']
 
@@ -640,23 +673,28 @@ def setup_game():
 
     elif myPlayer.ROLE == 'priest':
         myPlayer.hp = 60
+
+
 # This function will set up the game before starting it
 
 # ==GAME SETUPS ENDS== #
 
 
 # ==GAME INTERACTIVITY== #
-def print_position():
+def void_print_position_gmd():
     print('\n' + ('#' * (4 + len(myPlayer.position))))
     print('# ' + myPlayer.position.upper() + ' #')
     print('# ' + zone_map_keys[myPlayer.position].DESCRIPTION + ' #')
     print('\n' + ('#' * (4 + len(myPlayer.position))))
+
+
 # This function will print the position of the player
 
 
-def prompt():
+def void_prompt_gmi():
     acceptable_actions = ['go', 'move', 'travel', 'walk', 'look', 'examine', 'inspect', 'interact',
-                          'quit', 'use', 'grab', 'collect', 'take', 'trow', 'drop', 'view']
+                          'quit', 'use', 'grab', 'collect', 'take', 'trow', 'drop', 'view', 'speak',
+                          'say', 'talk']
     print('\n' + '=' * 24)
     print('What would you like to do?')
     action = (input('> ')).lower().strip()
@@ -687,41 +725,45 @@ def prompt():
         exit()
 
     elif actionVerb in ['go', 'move', 'travel', 'walk']:
-        myPlayer.player_move(actionObj)
+        myPlayer.player_input_to_move_gmi(actionObj)
 
     elif actionVerb in ['look', 'examine', 'inspect', 'interact']:
-        myPlayer.player_examine(actionObj)
+        myPlayer.player_examine_zone_gmf(actionObj)
 
     elif actionVerb == 'use':
-        myPlayer.player_use_item(actionObj)
+        myPlayer.player_input_to_use_gmi(actionObj)
 
     elif actionVerb in ['grab', 'collect', 'take']:
-        myPlayer.collect_item(actionObj)
+        myPlayer.player_collect_item_gmi(actionObj)
 
     elif actionVerb in ['trow', 'drop']:
-        myPlayer.drop_item(actionObj)
+        myPlayer.player_drop_item_gmi(actionObj)
 
     elif actionVerb == 'view':
-        myPlayer.view_inventory()
+        myPlayer.player_visualize_inventory_gmf()
+
+
 # This function will be the main interactivity with the game, the prompt asking him actions
 
 # ==GAME INTERACTIVITY ENDS== #
 
 
 # ==GAME FUNCTIONALITY== #
-def main_game_loop():
+def void_main_game_loop_gmf():
     while not myPlayer.game_over:
-        prompt()
+        void_prompt_gmi()
+
+
 # This function will keep the main game loop running
 
 
-def start_game():
-    clear_screen()
-    setup_game()
+def void_start_game_gmf():
+    void_clear_screen_gmf()
+    void_setup_game_gmi()
 
     # Play the game introduction
     quote = 'Welcome, ' + myPlayer.NAME + ' the prisoner and ex-' + myPlayer.ROLE + '.\n'
-    timed_speech(quote, 0.05)
+    void_speech_gmf(quote, 0.05)
 
     speech1 = 'Welcome to this fantasy world!\n'
     speech2 = 'I hope it greets you well\n'
@@ -729,15 +771,16 @@ def start_game():
     speech4 = 'Heheheh...\n'
     speech5 = '# Let the journey begin... #'
 
-    timed_speech(speech1, 0.03)
-    timed_speech(speech2, 0.03)
-    timed_speech(speech3, 0.1)
-    timed_speech(speech4, 0.2)
-    timed_speech(speech5, 0.1)
+    void_speech_gmf(speech1, 0.03)
+    void_speech_gmf(speech2, 0.03)
+    void_speech_gmf(speech3, 0.1)
+    void_speech_gmf(speech4, 0.2)
+    void_speech_gmf(speech5, 0.1)
+    void_clear_screen_gmf()
+    void_main_game_loop_gmf()
 
-    clear_screen()
-    main_game_loop()
+
 # This function will start the game
 
 
-title_screen_display()
+void_tittle_screen_display_gmd()
