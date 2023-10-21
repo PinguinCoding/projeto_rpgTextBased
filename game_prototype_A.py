@@ -539,7 +539,6 @@ b1.UP = 'a1'
 b1.DOWN = 'c1'
 b1.LEFT = None
 b1.RIGHT = 'b2'
-b1.ITEMS = {items['bandage']}
 b1.CHANGES = {'bandage': 'The room where you toke the bandage, it seems more empty now.'}
 
 b2.ZONE_NAME = 'Dark room'
@@ -549,7 +548,7 @@ b2.UP = 'a2'
 b2.DOWN = 'c2'
 b2.LEFT = 'b1'
 b2.RIGHT = 'b3'
-b2.ITEMS = {items['small key']}
+
 b2.CHANGES = {'small key': 'The room where you toke the key, it seems more empty now.'}
 
 b3.ZONE_NAME = 'Dark room'
