@@ -11,6 +11,7 @@ class Zone(object):
         self.CHANGES = {}
         self.ITEMS = {}
         self.solved = False
+        self.neighbors = {'north': None, 'south': None}
 
 
 class Node:
@@ -26,12 +27,6 @@ class Node:
             zone_info[1] = node.data.ID
             list_zone.append(tuple(zone_info))
         return list_zone
-
-    def get_neighbors_directions(self):
-        if len(self.neighbors) == 4:
-            neighbors = self.get_neighbors()
-            return print(f"North neighbor: {neighbors[0][1]}\nEast neighbor: {neighbors[1][1]}\nSouth neighbor: "
-                         f"{neighbors[2][1]}\nWest neighbor: {neighbors[3][1]}")
 
 
 class Graph:
@@ -49,16 +44,16 @@ class Graph:
             node1.neighbors.append(node2)
             node2.neighbors.append(node1)
 
-    @staticmethod
-    def construct(center, *adjacent_zones):
-        for zone in adjacent_zones:
-            my_graph.add_edge(center, zone)
-
     def find_node(self, data):
         for node in self.nodes:
             if node.data == data:
                 return node
         return None
+
+    @staticmethod
+    def construct(center, *adjacent_zones):
+        for zone in adjacent_zones:
+            my_graph.add_edge(center, zone)
 
     def display(self):
         for node in self.nodes:
@@ -80,6 +75,8 @@ if __name__ == "__main__":
     zone_g = Zone(ID="G")
     zone_h = Zone(ID="H")
     zone_i = Zone(ID="I")
+    zone_j = Zone(ID="J")
+    zone_k = Zone(ID="K")
 
     zone_a.ZONE_NAME = "Corridor A"
     zone_b.ZONE_NAME = "Cafeteria"
@@ -90,6 +87,8 @@ if __name__ == "__main__":
     zone_g.ZONE_NAME = "Computer Lab"
     zone_h.ZONE_NAME = "Corridor C"
     zone_i.ZONE_NAME = "Science Lab"
+    zone_j.ZONE_NAME = "Stuff Room"
+    zone_k.ZONE_NAME = "Stairs"
 
     my_graph.add_node(zone_a)
     my_graph.add_node(zone_b)
@@ -100,14 +99,16 @@ if __name__ == "__main__":
     my_graph.add_node(zone_g)
     my_graph.add_node(zone_h)
     my_graph.add_node(zone_i)
+    my_graph.add_node(zone_j)
+    my_graph.add_node(zone_k)
 
     my_graph.construct(zone_a, zone_b, zone_c, zone_d, zone_e)
     my_graph.construct(zone_d, zone_h, zone_f, zone_g)
-    my_graph.construct(zone_h, zone_i)
+    my_graph.construct(zone_h, zone_j, zone_i, zone_k)
 
-    for node in my_graph.nodes:
-        print(node.data.ID)
-        node.get_neighbors_directions()
-        print()
-# When edges are added, they must be added in the formula north-east-south-west
-# All neighbors are displayed counterclockwise
+    my_graph.display()
+
+# TO DO LIST
+# Create an easy way to repeat the code above
+# Create a formula to build new zones
+# Document the code
